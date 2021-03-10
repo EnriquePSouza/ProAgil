@@ -49,7 +49,7 @@ namespace ProAgil.Repository
 
             return await query.ToArrayAsync();
         }
-        public async Task<Evento[]> GetAllEventosAsyncByTema(string tema, bool includePalestrantes)
+        public async Task<Evento[]> GetEventosAsyncByTema(string tema, bool includePalestrantes)
         {
             IQueryable<Evento> query = _context.Eventos
                 .Include(c => c.Lotes)
@@ -63,7 +63,7 @@ namespace ProAgil.Repository
             }
 
             query = query.OrderByDescending(c => c.DataEvento)
-                        .Where(c => c.Tema.Contains(tema));
+                        .Where(c => c.Tema.ToLower().Contains(tema.ToLower()));
 
             return await query.ToArrayAsync();
         }
@@ -87,14 +87,39 @@ namespace ProAgil.Repository
         }
 
         //Palestrante
-        public Task<Evento[]> GetAllPalestrantesAsync(bool includePalestrantes)
+        public async Task<Palestrante> GetPalestranteAsyncById(int palestranteId, bool includeEventos = false)
         {
-            throw new System.NotImplementedException();
+            IQueryable<Palestrante> query = _context.Palestrantes
+                .Include(c => c.RedesSociais);
+
+            if (includeEventos)
+            {
+                query = query
+                    .Include(pe => pe.PalestrantesEventos)
+                    .ThenInclude(e => e.Evento);
+            }
+
+            query = query.OrderBy(p => p.Nome)
+                        .Where(p => p.Id == palestranteId);
+
+            return await query.FirstOrDefaultAsync();
         }
-       
-        public Task<Evento> GetPalestranteAsyncById(int palestranteId, bool includePalestrantes)
+        public async Task<Palestrante[]> GetPalestrantesAsyncByName(string name, bool includeEventos = false)
         {
-            throw new System.NotImplementedException();
+            IQueryable<Palestrante> query = _context.Palestrantes
+                .Include(c => c.RedesSociais);
+
+            if (includeEventos)
+            {
+                query = query
+                    .Include(pe => pe.PalestrantesEventos)
+                    .ThenInclude(e => e.Evento);
+            }
+
+            query = query.OrderBy(p => p.Nome)
+                        .Where(p => p.Nome.ToLower().Contains(name.ToLower()));
+
+            return await query.ToArrayAsync();
         }
     }
 }
