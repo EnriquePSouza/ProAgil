@@ -68,7 +68,7 @@ namespace ProAgil.Api.Controllers
 
         }
 
-        // POST
+        // POST api/evento
         [HttpPost]
         public async Task<IActionResult> Post(Evento model)
         {
